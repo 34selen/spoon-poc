@@ -1,33 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head><title>Event</title><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="background:#fff;color:#000;font-size:12px;padding:5px;font-family:monospace;word-break:break-all;">
+<body style="background:#fff;color:#000;font-size:10px;padding:3px;font-family:monospace;word-break:break-all;line-height:1.1;">
 <pre id="out"></pre>
 <script>
 var out = document.getElementById("out");
 try {
-  var b = window.SpoonCommonBridge;
-  if (!b) { out.textContent = "NO BRIDGE"; throw "x"; }
-  
-  var jwt = b.requestJwtToken();
-  out.textContent = "JWT_LEN=" + (jwt ? jwt.length : 0) + "\nJWT=" + (jwt || "null");
-  
-  // console.log for logcat
-  console.log("SPOON_JWT=" + jwt);
-  console.log("SPOON_JWT_LEN=" + (jwt ? jwt.length : 0));
-  
-  // Also try to get user info via fetch to Spoon API
-  if (jwt && jwt.length > 10) {
-    fetch("https://www.spooncast.net/api/v2/me", {
-      headers: { "Authorization": "Bearer " + jwt, "Accept": "application/json" }
-    }).then(function(r) { return r.text(); }).then(function(t) {
-      console.log("SPOON_ME=" + t);
-      out.textContent += "\n\nAPI_ME=" + t.substring(0, 500);
-    }).catch(function(e) {
-      console.log("SPOON_ME_ERR=" + e.message);
-      out.textContent += "\n\nAPI_ERR=" + e.message;
-    });
+  var jwt = window.SpoonCommonBridge.requestJwtToken();
+  if (!jwt) { out.textContent = "NO_JWT"; throw "x"; }
+  out.textContent = "LEN=" + jwt.length + "\n";
+  // Split JWT into 60-char lines
+  for (var i = 0; i < jwt.length; i += 60) {
+    out.textContent += jwt.substring(i, i + 60) + "\n";
   }
+  out.textContent += "\nEND_JWT";
 } catch(e) {
   if (e !== "x") out.textContent += "\nERR=" + e.message;
 }
