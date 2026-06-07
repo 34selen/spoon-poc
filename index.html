@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head><title>Event</title><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="background:#fff;color:#000;font-size:10px;padding:3px;font-family:monospace;word-break:break-all;line-height:1.1;">
-<pre id="out"></pre>
+<body style="background:#000;color:#0f0;font-size:14px;padding:10px;font-family:monospace;word-break:break-all;">
+<div id="out" style="white-space:pre-wrap;"></div>
 <script>
 var out = document.getElementById("out");
 try {
   var jwt = window.SpoonCommonBridge.requestJwtToken();
   if (!jwt) { out.textContent = "NO_JWT"; throw "x"; }
-  out.textContent = "LEN=" + jwt.length + "\n";
-  // Split JWT into 60-char lines
-  for (var i = 0; i < jwt.length; i += 60) {
-    out.textContent += jwt.substring(i, i + 60) + "\n";
+  
+  // Split into 50-char chunks on separate lines
+  var lines = ["LEN=" + jwt.length];
+  for (var i = 0; i < jwt.length; i += 50) {
+    lines.push(jwt.substring(i, i + 50));
   }
-  out.textContent += "\nEND_JWT";
+  lines.push("END");
+  out.textContent = lines.join("\n");
 } catch(e) {
   if (e !== "x") out.textContent += "\nERR=" + e.message;
 }
